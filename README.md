@@ -1,4 +1,5 @@
 # SimpleRecurringJobs
+[![NuGet version (SimpleRecurringJobs)](https://img.shields.io/nuget/v/SimpleRecurringJobs.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs/)
 
 SimpleRecurringJobs is a C# library designed for very easily running recurring jobs in your applications, where each job should run once per trigger regardless of how many instances of your application is running. 
 
@@ -31,6 +32,8 @@ public class SimpleJob : IIntervalJob
 ```
 
 ### ICronJob
+[![NuGet version (SimpleRecurringJobs.Cron)](https://img.shields.io/nuget/v/SimpleRecurringJobs.Cron.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs.Cron/)
+
 Cron jobs run according to a cron expression. This requires the package `SimpleRecurringJobs.Cron` which has a dependency on the third-party package `Cronos`.
 
 `.AddCronScheduler()` must be called in the builder callback in `AddSimpleRecurringJobs(...)`. 
@@ -65,6 +68,8 @@ services.AddSimpleRecurringJobs(b => b.UseInMemoryJobStore().WithJob<SimpleJob>(
 ```
 
 ## Redis 
+[![NuGet version (SimpleRecurringJobs.Redis)](https://img.shields.io/nuget/v/SimpleRecurringJobs.Redis.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs.Redis/)
+
 The package `SimpleRecurringJobs.Redis` allows using Redis for persisting job data. It depends on the Nuget package `StackExchange.Redis`.
 ```
 var redisConnStr = ...; // Get Redis connection string from somewhere.
@@ -73,6 +78,8 @@ services.AddSimpleRecurringJobs(b => b.UseRedisJobStore(connStr, o => o.KeyPrefi
 
 
 ## MongoDB
+[![NuGet version (SimpleRecurringJobs.Mongo)](https://img.shields.io/nuget/v/SimpleRecurringJobs.Mongo.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs.Mongo/)
+
 The package `SimpleRecurringJobs.Mongo` allows using MongoDB for persisting job data. It depends on the Nuget package `MongoDB.Driver`.
 ```
 var mongoConnStr = ...; // Get MongoDB connection string from somewhere.
