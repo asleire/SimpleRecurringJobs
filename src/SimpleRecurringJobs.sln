@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs", "SimpleRecurringJobs\SimpleRecurringJobs.csproj", "{6D1E99F0-D725-4F37-9FD3-9E2A2E7F01D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Redis", "SimpleRecurringJobs.Redis\SimpleRecurringJobs.Redis.csproj", "{A3193F0E-36B3-4B20-82A0-9D6493DFA3A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Mongo", "SimpleRecurringJobs.Mongo\SimpleRecurringJobs.Mongo.csproj", "{50AA10B2-2DBF-4F72-BA86-776060D31B8B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6C66BAA3-77C7-439E-928C-A7C4ED3BE8D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Tests", "SimpleRecurringJobs.Tests\SimpleRecurringJobs.Tests.csproj", "{BA913158-452D-48C5-908B-B1199B7BCE43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Tests.Redis", "SimpleRecurringJobs.Tests.Redis\SimpleRecurringJobs.Tests.Redis.csproj", "{2CD3501F-DF91-4A2D-B6BB-168D99C44238}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Tests.Mongo", "SimpleRecurringJobs.Tests.Mongo\SimpleRecurringJobs.Tests.Mongo.csproj", "{EF68E26C-1642-49A5-8283-6414908FFF03}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D7A662DA-DCB6-477A-8B75-FA435E49ED0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Samples.AspNetCore", "SimpleRecurringJobs.Samples.AspNetCore\SimpleRecurringJobs.Samples.AspNetCore.csproj", "{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Cron", "SimpleRecurringJobs.Cron\SimpleRecurringJobs.Cron.csproj", "{97A3E33E-D7D1-46FD-BF8B-87C25C5B655C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRecurringJobs.Samples.NetCoreConsole", "SimpleRecurringJobs.Samples.NetCoreConsole\SimpleRecurringJobs.Samples.NetCoreConsole.csproj", "{4F7C201A-E9B3-4890-BA62-95ABDA2933F6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D1E99F0-D725-4F37-9FD3-9E2A2E7F01D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1E99F0-D725-4F37-9FD3-9E2A2E7F01D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1E99F0-D725-4F37-9FD3-9E2A2E7F01D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1E99F0-D725-4F37-9FD3-9E2A2E7F01D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3193F0E-36B3-4B20-82A0-9D6493DFA3A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3193F0E-36B3-4B20-82A0-9D6493DFA3A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3193F0E-36B3-4B20-82A0-9D6493DFA3A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3193F0E-36B3-4B20-82A0-9D6493DFA3A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50AA10B2-2DBF-4F72-BA86-776060D31B8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50AA10B2-2DBF-4F72-BA86-776060D31B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50AA10B2-2DBF-4F72-BA86-776060D31B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50AA10B2-2DBF-4F72-BA86-776060D31B8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA913158-452D-48C5-908B-B1199B7BCE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA913158-452D-48C5-908B-B1199B7BCE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA913158-452D-48C5-908B-B1199B7BCE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA913158-452D-48C5-908B-B1199B7BCE43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CD3501F-DF91-4A2D-B6BB-168D99C44238}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CD3501F-DF91-4A2D-B6BB-168D99C44238}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CD3501F-DF91-4A2D-B6BB-168D99C44238}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CD3501F-DF91-4A2D-B6BB-168D99C44238}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF68E26C-1642-49A5-8283-6414908FFF03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF68E26C-1642-49A5-8283-6414908FFF03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF68E26C-1642-49A5-8283-6414908FFF03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF68E26C-1642-49A5-8283-6414908FFF03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97A3E33E-D7D1-46FD-BF8B-87C25C5B655C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97A3E33E-D7D1-46FD-BF8B-87C25C5B655C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97A3E33E-D7D1-46FD-BF8B-87C25C5B655C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97A3E33E-D7D1-46FD-BF8B-87C25C5B655C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F7C201A-E9B3-4890-BA62-95ABDA2933F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F7C201A-E9B3-4890-BA62-95ABDA2933F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F7C201A-E9B3-4890-BA62-95ABDA2933F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F7C201A-E9B3-4890-BA62-95ABDA2933F6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BA913158-452D-48C5-908B-B1199B7BCE43} = {6C66BAA3-77C7-439E-928C-A7C4ED3BE8D7}
+		{2CD3501F-DF91-4A2D-B6BB-168D99C44238} = {6C66BAA3-77C7-439E-928C-A7C4ED3BE8D7}
+		{EF68E26C-1642-49A5-8283-6414908FFF03} = {6C66BAA3-77C7-439E-928C-A7C4ED3BE8D7}
+		{E87E4BCF-35D0-4335-8F05-8E34BFE86B4A} = {D7A662DA-DCB6-477A-8B75-FA435E49ED0D}
+		{4F7C201A-E9B3-4890-BA62-95ABDA2933F6} = {D7A662DA-DCB6-477A-8B75-FA435E49ED0D}
+	EndGlobalSection
+EndGlobal

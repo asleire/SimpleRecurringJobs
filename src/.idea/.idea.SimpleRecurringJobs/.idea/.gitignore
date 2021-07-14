@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/modules.xml
+/projectSettingsUpdater.xml
+/.idea.SimpleRecurringJobs.iml
+# Datasource local storage ignored files
+/../../../../../../../../../../:\Users\alekk\Documents\GitLab\SimpleRecurringJobs\src\.idea\.idea.SimpleRecurringJobs\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
