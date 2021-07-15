@@ -83,7 +83,7 @@ namespace SimpleRecurringJobs.InMemory
                     _store._locks.Remove(_key);
                 }
 
-                return ValueTask.CompletedTask;
+                return new ValueTask();
             }
         }
     }

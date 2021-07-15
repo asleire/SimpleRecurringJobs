@@ -7,8 +7,8 @@ namespace SimpleRecurringJobs
     {
         public static Task WaitUntilCancelled(CancellationToken token)
         {
-            var source = new TaskCompletionSource();
-            token.Register(() => source.SetResult());
+            var source = new TaskCompletionSource<bool>();
+            token.Register(() => source.SetResult(true));
             return source.Task;
         }
     }
