@@ -4,6 +4,7 @@
         <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
