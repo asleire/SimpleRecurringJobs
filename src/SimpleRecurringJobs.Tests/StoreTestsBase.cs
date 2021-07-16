@@ -55,6 +55,25 @@ namespace SimpleRecurringJobs.Tests
         }
 
         [Fact]
+        public async Task LockAndReleaseAndLockShouldSucceed()
+        {
+            var store = await GetStore();
+
+            var job = new StoreTestJob();
+
+            var lock1 = await store.TryLock(job, Guid.NewGuid().ToString());
+            Assert.NotNull(lock1);
+
+            var lock2Fail = await store.TryLock(job, Guid.NewGuid().ToString());
+            Assert.Null(lock2Fail);
+
+            await lock1!.DisposeAsync();
+
+            await using var lock2 = await store.TryLock(job, Guid.NewGuid().ToString());
+            Assert.NotNull(lock2);
+        }
+
+        [Fact]
         public async Task MultipleLocksSameJobOnlyOneShouldSucceed()
         {
             var store = await GetStore();

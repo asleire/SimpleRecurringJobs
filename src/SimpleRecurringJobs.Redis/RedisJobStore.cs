@@ -35,8 +35,9 @@ namespace SimpleRecurringJobs.Redis
 
         public async Task<IJobLock?> TryLock(IJob job, string jobInstanceId)
         {
+            var lockKey = $"SimpleRecurringJobs:{job.Id}:Lock";
             var hasLock = await Db.LockTakeAsync(
-                $"SimpleRecurringJobs:{job.Id}:Lock",
+                lockKey,
                 jobInstanceId,
                 TimeSpan.FromMinutes(10)
             );
@@ -44,7 +45,7 @@ namespace SimpleRecurringJobs.Redis
             if (!hasLock)
                 return null;
 
-            return new RedisLock(_connectionMultiplexer, job.Id, jobInstanceId);
+            return new RedisLock(() => Db, lockKey, jobInstanceId);
         }
 
         public async Task Save(JobInfo info)
@@ -56,25 +57,25 @@ namespace SimpleRecurringJobs.Redis
 
         private class RedisLock : IJobLock
         {
-            private readonly IConnectionMultiplexer _connectionMultiplexer;
+            private readonly Func<IDatabase> _dbFunc;
             private readonly string _key;
             private readonly string _value;
 
-            public RedisLock(IConnectionMultiplexer connectionMultiplexer, string key, string value)
+            public RedisLock(Func<IDatabase> dbFunc, string key, string value)
             {
-                _connectionMultiplexer = connectionMultiplexer;
+                _dbFunc = dbFunc;
                 _key = key;
                 _value = value;
             }
 
             public async Task Refresh()
             {
-                await _connectionMultiplexer.GetDatabase().LockExtendAsync(_key, _value, TimeSpan.FromMinutes(10));
+                await _dbFunc().LockExtendAsync(_key, _value, TimeSpan.FromMinutes(10));
             }
 
             public async ValueTask DisposeAsync()
             {
-                await _connectionMultiplexer.GetDatabase().LockReleaseAsync(_key, _value);
+                await _dbFunc().LockReleaseAsync(_key, _value);
             }
         }
     }
