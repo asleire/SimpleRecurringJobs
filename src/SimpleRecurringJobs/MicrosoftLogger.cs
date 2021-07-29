@@ -27,6 +27,7 @@ namespace SimpleRecurringJobs
             {
                 EventLevel.Warning => LogLevel.Warning,
                 EventLevel.Critical => LogLevel.Critical,
+                EventLevel.Error => LogLevel.Error,
                 EventLevel.Informational => LogLevel.Information,
                 EventLevel.Verbose => LogLevel.Trace,
                 _ => LogLevel.Information
