@@ -82,6 +82,7 @@ namespace SimpleRecurringJobs
                 try
                 {
                     info = await _jobStore.Retrieve(job);
+                    errorCount = 0;
                 }
                 catch (Exception ex)
                 {
@@ -91,15 +92,17 @@ namespace SimpleRecurringJobs
                         job.Id
                     );
                     errorCount++;
-                    if (errorCount > 10) throw;
 
-                    await _delayer.Delay(1000 * errorCount, cancellationToken);
+                    var retryDelay = Math.Min(1000 * errorCount, 60_000);
+
+                    await _delayer.Delay(retryDelay, cancellationToken);
                     continue;
                 }
 
                 try
                 {
                     var shouldExecuteNow = await scheduler.WaitUntilNext(job, info, cancellationToken);
+                    errorCount = 0;
 
                     if (!shouldExecuteNow)
                         continue;
@@ -112,9 +115,10 @@ namespace SimpleRecurringJobs
                         job.Id
                     );
                     errorCount++;
-                    if (errorCount > 10) throw;
+                    
+                    var retryDelay = Math.Min(1000 * errorCount, 60_000);
 
-                    await _delayer.Delay(1000 * errorCount, cancellationToken);
+                    await _delayer.Delay(retryDelay, cancellationToken);
                     continue;
                 }
 
