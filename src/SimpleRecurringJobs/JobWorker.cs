@@ -41,34 +41,55 @@ namespace SimpleRecurringJobs
         /// <exception cref="SimpleRecurringJobsJobMultipleSchedulersException"></exception>
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var jobs = _jobs.ToList();
-            var schedulerMap = new Dictionary<string, IJobScheduler>();
-
-            foreach (var job in jobs)
+            try
             {
-                if (schedulerMap.ContainsKey(job.Id))
-                    throw new SimpleRecurringJobsDuplicateJobIdException(job);
+                _logger.LogInfo("Initializing SimpleRecurringJobs...");
+                var jobs = _jobs.ToList();
+                var schedulerMap = new Dictionary<string, IJobScheduler>();
 
-                foreach (var scheduler in _schedulers)
+                foreach (var job in jobs)
                 {
-                    if (!scheduler.CanHandle(job))
-                        continue;
-
                     if (schedulerMap.ContainsKey(job.Id))
-                        throw new SimpleRecurringJobsJobMultipleSchedulersException(job);
+                        throw new SimpleRecurringJobsDuplicateJobIdException(job);
 
-                    schedulerMap[job.Id] = scheduler;
+                    foreach (var scheduler in _schedulers)
+                    {
+                        if (!scheduler.CanHandle(job))
+                            continue;
+
+                        if (schedulerMap.ContainsKey(job.Id))
+                            throw new SimpleRecurringJobsJobMultipleSchedulersException(job);
+
+                        schedulerMap[job.Id] = scheduler;
+                    }
+
+                    if (!schedulerMap.ContainsKey(job.Id))
+                        throw new SimpleRecurringJobsJobNotSchedulableException(job);
                 }
 
-                if (!schedulerMap.ContainsKey(job.Id))
-                    throw new SimpleRecurringJobsJobNotSchedulableException(job);
+                if (jobs.Count == 0)
+                {
+                    _logger.LogInfo("SimpleRecurringJobs found no registered jobs. Stopping.");
+                    return;
+                }
+
+                var tasks = new List<Task>();
+
+                foreach (var job in jobs)
+                {
+                    _logger.LogInfo("Starting job {JobId}...", job.Id);
+                    tasks.Add(RunJob(job, schedulerMap[job.Id], cancellationToken));
+                }
+
+                _logger.LogInfo("SimpleRecurringJobs is running.");
+                await Task.WhenAll(tasks);
+                _logger.LogInfo("SimpleRecurringJobs was stopped.");
             }
-
-            var tasks = new List<Task>();
-
-            foreach (var job in jobs) tasks.Add(RunJob(job, schedulerMap[job.Id], cancellationToken));
-
-            await Task.WhenAll(tasks);
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "An exception occured while starting SimpleRecurringJobs");
+                throw;
+            }
         }
 
         private async Task RunJob(IJob job, IJobScheduler scheduler, CancellationToken cancellationToken)
@@ -115,7 +136,7 @@ namespace SimpleRecurringJobs
                         job.Id
                     );
                     errorCount++;
-                    
+
                     var retryDelay = Math.Min(1000 * errorCount, 60_000);
 
                     await _delayer.Delay(retryDelay, cancellationToken);

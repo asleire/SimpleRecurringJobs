@@ -61,6 +61,8 @@ public class SimpleCronJob : ICronJob
 ```
 
 ## Stores
+SimpleRecurringJobs requires a data store for storing job timestamps and job locks.
+
 ### InMemory
 The InMemory job store should only be used for local development. It will not work for multiple instances of your application.
 ```
