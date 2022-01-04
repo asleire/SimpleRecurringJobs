@@ -15,6 +15,9 @@ namespace SimpleRecurringJobs
         private readonly IJobStore _jobStore;
         private readonly IJobLogger _logger;
         private readonly IEnumerable<IJobScheduler> _schedulers;
+#if PRE_NET_6
+        private readonly IHostLifetime _hostLifetime;
+#endif
 
         public JobsWorker(
             IEnumerable<IJob> jobs,
@@ -22,7 +25,12 @@ namespace SimpleRecurringJobs
             IJobLogger logger,
             IJobStore jobStore,
             IAsyncDelayer delayer,
-            IJobExecutor jobExecutor)
+            IJobExecutor jobExecutor
+#if PRE_NET_6
+            ,
+            IHostLifetime hostLifetime
+#endif
+        )
         {
             _jobs = jobs.ToList();
             _schedulers = schedulers;
@@ -30,6 +38,10 @@ namespace SimpleRecurringJobs
             _delayer = delayer;
             _jobExecutor = jobExecutor;
             _logger = logger.ForSource<JobsWorker>();
+
+#if PRE_NET_6
+            _hostLifetime = hostLifetime;
+#endif
         }
 
         /// <summary>
@@ -88,6 +100,10 @@ namespace SimpleRecurringJobs
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogError(ex, "An exception occured while starting SimpleRecurringJobs");
+
+#if PRE_NET_6
+                await _hostLifetime.StopAsync(CancellationToken.None);
+#endif
                 throw;
             }
         }
