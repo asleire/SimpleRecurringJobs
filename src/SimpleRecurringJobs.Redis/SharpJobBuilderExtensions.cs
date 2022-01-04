@@ -2,52 +2,51 @@
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
-namespace SimpleRecurringJobs.Redis
+namespace SimpleRecurringJobs.Redis;
+
+public static class SimpleRecurringJobsBuilderExtensions
 {
-    public static class SimpleRecurringJobsBuilderExtensions
+    public static JobsBuilder UseRedisJobStore(
+        this JobsBuilder builder,
+        Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
     {
-        public static JobsBuilder UseRedisJobStore(
-            this JobsBuilder builder,
-            Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
-        {
-            builder.WithJobStore(
-                sp =>
-                {
-                    var connectionMultiplexer = sp.GetService<IConnectionMultiplexer>();
+        builder.WithJobStore(
+            sp =>
+            {
+                var connectionMultiplexer = sp.GetService<IConnectionMultiplexer>();
 
-                    if (connectionMultiplexer == null)
-                        throw new InvalidOperationException(
-                            "No Redis IConnectionMultiplexer is registered. Register one, or use a different method of registered RedisJobStore."
-                        );
+                if (connectionMultiplexer == null)
+                    throw new InvalidOperationException(
+                        "No Redis IConnectionMultiplexer is registered. Register one, or use a different method of registered RedisJobStore."
+                    );
 
-                    var opts = new SimpleRecurringJobsRedisOptions();
-                    optsFn?.Invoke(opts);
+                var opts = new SimpleRecurringJobsRedisOptions();
+                optsFn?.Invoke(opts);
 
-                    return ActivatorUtilities.CreateInstance<RedisJobStore>(sp, opts);
-                }
-            );
+                return ActivatorUtilities.CreateInstance<RedisJobStore>(sp, opts);
+            }
+        );
 
-            return builder;
-        }
+        return builder;
+    }
 
-        public static JobsBuilder UseRedisJobStore(
-            this JobsBuilder builder,
-            string redisConnectionString,
-            Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
-        {
-            builder.WithJobStore(
-                sp =>
-                {
-                    var connectionMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+    public static JobsBuilder UseRedisJobStore(
+        this JobsBuilder builder,
+        string redisConnectionString,
+        Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
+    {
+        builder.WithJobStore(
+            sp =>
+            {
+                var connectionMultiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
 
-                    var opts = new SimpleRecurringJobsRedisOptions();
-                    optsFn?.Invoke(opts);
+                var opts = new SimpleRecurringJobsRedisOptions();
+                optsFn?.Invoke(opts);
 
-                    return ActivatorUtilities.CreateInstance<RedisJobStore>(sp, connectionMultiplexer, opts);
-                }
-            );
+                return ActivatorUtilities.CreateInstance<RedisJobStore>(sp, connectionMultiplexer, opts);
+            }
+        );
 
-            return builder;
-        }
+        return builder;
     }
 }

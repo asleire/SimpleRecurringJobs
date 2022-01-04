@@ -2,25 +2,24 @@
 using System.Diagnostics.Tracing;
 using Xunit.Abstractions;
 
-namespace SimpleRecurringJobs.Tests
+namespace SimpleRecurringJobs.Tests;
+
+public class XunitLogger : IJobLogger
 {
-    public class XunitLogger : IJobLogger
+    private readonly ITestOutputHelper _outputHelper;
+
+    public XunitLogger(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
+        _outputHelper = outputHelper;
+    }
 
-        public XunitLogger(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
+    public void Log(EventLevel level, Exception? ex, string message, params object[] parameters)
+    {
+        _outputHelper.WriteLine($"{level}: {message}");
+    }
 
-        public void Log(EventLevel level, Exception? ex, string message, params object[] parameters)
-        {
-            _outputHelper.WriteLine($"{level}: {message}");
-        }
-
-        public IJobLogger ForSource<T>()
-        {
-            return this;
-        }
+    public IJobLogger ForSource<T>()
+    {
+        return this;
     }
 }

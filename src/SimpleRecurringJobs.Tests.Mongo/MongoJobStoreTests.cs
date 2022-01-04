@@ -7,52 +7,51 @@ using SimpleRecurringJobs.Mongo;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SimpleRecurringJobs.Tests.Mongo
+namespace SimpleRecurringJobs.Tests.Mongo;
+
+public class MongoJobStoreTests : StoreTestsBase
 {
-    public class MongoJobStoreTests : StoreTestsBase
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public MongoJobStoreTests(ITestOutputHelper testOutputHelper)
     {
-        private readonly ITestOutputHelper _testOutputHelper;
+        _testOutputHelper = testOutputHelper;
+    }
 
-        public MongoJobStoreTests(ITestOutputHelper testOutputHelper)
+    protected override async Task<IJobStore> GetStore()
+    {
+        var sc = new ServiceCollection();
+
+        try
         {
-            _testOutputHelper = testOutputHelper;
+            var connStr = await File.ReadAllTextAsync("mongoconnstr.testcfg");
+            connStr = connStr.Trim();
+            var testId = Guid.NewGuid().ToString("N");
+            sc.AddSimpleRecurringJobs(
+                b => b.UseMongoJobStore(
+                    connStr,
+                    o =>
+                    {
+                        o.LockCollectionName = $"tests_{testId}_locks";
+                        o.JobInfoCollectionName = $"tests_{testId}_jobinfo";
+                    }
+                )
+            );
+        }
+        catch (Exception)
+        {
+            _testOutputHelper.WriteLine(
+                "Create a file named 'redisconnstr.testcfg' and place a redis connection string in it."
+            );
+            throw;
         }
 
-        protected override async Task<IJobStore> GetStore()
-        {
-            var sc = new ServiceCollection();
+        var sp = sc.BuildServiceProvider();
 
-            try
-            {
-                var connStr = await File.ReadAllTextAsync("mongoconnstr.testcfg");
-                connStr = connStr.Trim();
-                var testId = Guid.NewGuid().ToString("N");
-                sc.AddSimpleRecurringJobs(
-                    b => b.UseMongoJobStore(
-                        connStr,
-                        o =>
-                        {
-                            o.LockCollectionName = $"tests_{testId}_locks";
-                            o.JobInfoCollectionName = $"tests_{testId}_jobinfo";
-                        }
-                    )
-                );
-            }
-            catch (Exception)
-            {
-                _testOutputHelper.WriteLine(
-                    "Create a file named 'redisconnstr.testcfg' and place a redis connection string in it."
-                );
-                throw;
-            }
+        var store = sp.GetRequiredService<IJobStore>();
 
-            var sp = sc.BuildServiceProvider();
+        var mongoStore = Assert.IsType<MongoJobStore>(store);
 
-            var store = sp.GetRequiredService<IJobStore>();
-
-            var mongoStore = Assert.IsType<MongoJobStore>(store);
-
-            return mongoStore;
-        }
+        return mongoStore;
     }
 }

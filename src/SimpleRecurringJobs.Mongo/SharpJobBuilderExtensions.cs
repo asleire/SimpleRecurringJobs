@@ -3,61 +3,60 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 
-namespace SimpleRecurringJobs.Mongo
+namespace SimpleRecurringJobs.Mongo;
+
+public static class SimpleRecurringJobsBuilderExtensions
 {
-    public static class SimpleRecurringJobsBuilderExtensions
+    public static JobsBuilder UseMongoJobStore(
+        this JobsBuilder builder,
+        Func<IServiceProvider, IMongoDatabase> dbResolver,
+        Action<SimpleRecurringJobsMongoOptions>? optsFn = null)
     {
-        public static JobsBuilder UseMongoJobStore(
-            this JobsBuilder builder,
-            Func<IServiceProvider, IMongoDatabase> dbResolver,
-            Action<SimpleRecurringJobsMongoOptions>? optsFn = null)
-        {
-            builder.WithJobStore(
-                sp =>
+        builder.WithJobStore(
+            sp =>
+            {
+                var opts = new SimpleRecurringJobsMongoOptions();
+                optsFn?.Invoke(opts);
+
+                var db = dbResolver(sp);
+
+                return ActivatorUtilities.CreateInstance<MongoJobStore>(sp, db, opts);
+            }
+        );
+
+        return builder;
+    }
+
+    public static JobsBuilder UseMongoJobStore(
+        this JobsBuilder builder,
+        string mongoConnectionString,
+        Action<SimpleRecurringJobsMongoOptions>? optsFn = null)
+    {
+        builder.WithJobStore(
+            sp =>
+            {
+                var opts = new SimpleRecurringJobsMongoOptions();
+                optsFn?.Invoke(opts);
+
+                var dbName = opts.Database;
+
+                if (string.IsNullOrEmpty(dbName))
                 {
-                    var opts = new SimpleRecurringJobsMongoOptions();
-                    optsFn?.Invoke(opts);
+                    var connString = new ConnectionString(mongoConnectionString);
 
-                    var db = dbResolver(sp);
+                    if (string.IsNullOrEmpty(connString.DatabaseName))
+                        throw new Exception("Database must be specified in Mongo Connection string or in options.");
 
-                    return ActivatorUtilities.CreateInstance<MongoJobStore>(sp, db, opts);
+                    dbName = connString.DatabaseName;
                 }
-            );
 
-            return builder;
-        }
+                var mongoClient = new MongoClient(mongoConnectionString);
+                var db = mongoClient.GetDatabase(dbName);
 
-        public static JobsBuilder UseMongoJobStore(
-            this JobsBuilder builder,
-            string mongoConnectionString,
-            Action<SimpleRecurringJobsMongoOptions>? optsFn = null)
-        {
-            builder.WithJobStore(
-                sp =>
-                {
-                    var opts = new SimpleRecurringJobsMongoOptions();
-                    optsFn?.Invoke(opts);
+                return ActivatorUtilities.CreateInstance<MongoJobStore>(sp, db, opts);
+            }
+        );
 
-                    var dbName = opts.Database;
-
-                    if (string.IsNullOrEmpty(dbName))
-                    {
-                        var connString = new ConnectionString(mongoConnectionString);
-
-                        if (string.IsNullOrEmpty(connString.DatabaseName))
-                            throw new Exception("Database must be specified in Mongo Connection string or in options.");
-
-                        dbName = connString.DatabaseName;
-                    }
-
-                    var mongoClient = new MongoClient(mongoConnectionString);
-                    var db = mongoClient.GetDatabase(dbName);
-
-                    return ActivatorUtilities.CreateInstance<MongoJobStore>(sp, db, opts);
-                }
-            );
-
-            return builder;
-        }
+        return builder;
     }
 }

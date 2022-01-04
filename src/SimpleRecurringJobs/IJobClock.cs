@@ -1,16 +1,15 @@
 ﻿using System;
 
-namespace SimpleRecurringJobs
+namespace SimpleRecurringJobs;
+
+public interface IJobClock
 {
-    public interface IJobClock
+    DateTime UtcNow { get; }
+
+    public static IJobClock SystemClock { get; } = new SystemJobClock();
+
+    private class SystemJobClock : IJobClock
     {
-        DateTime UtcNow { get; }
-
-        public static IJobClock SystemClock { get; } = new SystemJobClock();
-
-        private class SystemJobClock : IJobClock
-        {
-            public DateTime UtcNow => DateTime.UtcNow;
-        }
+        public DateTime UtcNow => DateTime.UtcNow;
     }
 }

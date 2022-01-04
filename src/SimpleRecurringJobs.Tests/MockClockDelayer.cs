@@ -3,63 +3,62 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SimpleRecurringJobs.Tests
+namespace SimpleRecurringJobs.Tests;
+
+/// <summary>
+///     Allows using a MockClock to perform the equivalent of Task.Delay
+/// </summary>
+public class MockDelayer : IAsyncDelayer
 {
-    /// <summary>
-    ///     Allows using a MockClock to perform the equivalent of Task.Delay
-    /// </summary>
-    public class MockDelayer : IAsyncDelayer
+    private readonly object _lock = new();
+    private readonly Dictionary<Guid, WaitObject> _waitObjects = new();
+
+    public MockDelayer(MockClock clock)
     {
-        private readonly object _lock = new();
-        private readonly Dictionary<Guid, WaitObject> _waitObjects = new();
+        clock.TimeChanged += MoveTime;
+    }
 
-        public MockDelayer(MockClock clock)
+    public async Task Delay(TimeSpan timeSpan, CancellationToken cancellationToken)
+    {
+        if (timeSpan == TimeSpan.Zero)
+            return;
+
+        var waitObject = new WaitObject
         {
-            clock.TimeChanged += MoveTime;
+            TimeRemaining = timeSpan
+        };
+
+        lock (_lock)
+        {
+            _waitObjects.Add(waitObject.Id, waitObject);
         }
 
-        public async Task Delay(TimeSpan timeSpan, CancellationToken cancellationToken)
+        await Task.WhenAny(waitObject.CompletionSource.Task, CancelableTask.WaitUntilCancelled(cancellationToken));
+    }
+
+    private void MoveTime(TimeSpan time)
+    {
+        lock (_lock)
         {
-            if (timeSpan == TimeSpan.Zero)
-                return;
+            var expired = new List<Guid>();
+            foreach (var (id, obj) in _waitObjects)
+                if (time >= obj.TimeRemaining)
+                    expired.Add(id);
+                else
+                    obj.TimeRemaining -= time;
 
-            var waitObject = new WaitObject
-            {
-                TimeRemaining = timeSpan
-            };
-
-            lock (_lock)
-            {
-                _waitObjects.Add(waitObject.Id, waitObject);
-            }
-
-            await Task.WhenAny(waitObject.CompletionSource.Task, CancelableTask.WaitUntilCancelled(cancellationToken));
+            foreach (var exp in expired)
+                if (_waitObjects.Remove(exp, out var waitObj))
+                    waitObj.CompletionSource.SetResult();
         }
+    }
 
-        private void MoveTime(TimeSpan time)
-        {
-            lock (_lock)
-            {
-                var expired = new List<Guid>();
-                foreach (var (id, obj) in _waitObjects)
-                    if (time >= obj.TimeRemaining)
-                        expired.Add(id);
-                    else
-                        obj.TimeRemaining -= time;
+    private class WaitObject
+    {
+        public Guid Id { get; } = Guid.NewGuid();
 
-                foreach (var exp in expired)
-                    if (_waitObjects.Remove(exp, out var waitObj))
-                        waitObj.CompletionSource.SetResult();
-            }
-        }
+        public TimeSpan TimeRemaining { get; set; }
 
-        private class WaitObject
-        {
-            public Guid Id { get; } = Guid.NewGuid();
-
-            public TimeSpan TimeRemaining { get; set; }
-
-            public TaskCompletionSource CompletionSource { get; } = new();
-        }
+        public TaskCompletionSource CompletionSource { get; } = new();
     }
 }
