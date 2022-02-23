@@ -8,7 +8,7 @@ public static class SimpleRecurringJobsBuilderExtensions
 {
     public static JobsBuilder UseRedisJobStore(
         this JobsBuilder builder,
-        Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
+        Action<IServiceProvider, SimpleRecurringJobsRedisOptions>? optsFn = null)
     {
         builder.WithJobStore(
             sp =>
@@ -21,13 +21,20 @@ public static class SimpleRecurringJobsBuilderExtensions
                     );
 
                 var opts = new SimpleRecurringJobsRedisOptions();
-                optsFn?.Invoke(opts);
+                optsFn?.Invoke(sp, opts);
 
                 return ActivatorUtilities.CreateInstance<RedisJobStore>(sp, opts);
             }
         );
 
         return builder;
+    }
+
+    public static JobsBuilder UseRedisJobStore(
+        this JobsBuilder builder,
+        Action<SimpleRecurringJobsRedisOptions>? optsFn = null)
+    {
+        return builder.UseRedisJobStore((_, opts) => optsFn?.Invoke(opts));
     }
 
     public static JobsBuilder UseRedisJobStore(
