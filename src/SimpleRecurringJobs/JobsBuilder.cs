@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +26,10 @@ public class JobsBuilder
         return this;
     }
 
+
+#if !PRE_NET_5
+    [RequiresUnreferencedCode("WithJobsFromAssembly is incompatible with trimming.")]
+#endif
     public JobsBuilder WithJobsFromAssembly<TJob>() where TJob : IJob
     {
         foreach (var type in typeof(TJob).Assembly.GetTypes().Where(typeof(IJob).IsAssignableFrom))
