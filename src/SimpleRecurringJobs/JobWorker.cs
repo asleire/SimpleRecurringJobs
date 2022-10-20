@@ -110,70 +110,47 @@ internal class JobsWorker : BackgroundService
 
     private async Task RunJob(IJob job, IJobScheduler scheduler, CancellationToken cancellationToken)
     {
-        var errorCount = 0;
+        var exceptionCount = 0;
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            JobInfo info;
+            var action = "";
 
             try
             {
-                info = await _jobStore.Retrieve(job);
-                errorCount = 0;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Unexpected internal error occurred retrieving job info for job {JobId}.",
-                    job.Id
-                );
-                errorCount++;
-
-                var retryDelay = Math.Min(1000 * errorCount, 60_000);
-
-                await _delayer.Delay(retryDelay, cancellationToken);
-                continue;
-            }
-
-            try
-            {
+                action = "Retrieve job info from job store";
+                var info = await _jobStore.Retrieve(job);
+                
+                action = "Wait for next trigger";
                 var shouldExecuteNow = await scheduler.WaitUntilNext(job, info, cancellationToken);
-                errorCount = 0;
 
                 if (!shouldExecuteNow)
                     continue;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                _logger.LogError(
-                    ex,
-                    "Unexpected internal error while waiting for next trigger for job {JobId}.",
-                    job.Id
-                );
-                errorCount++;
-
-                var retryDelay = Math.Min(1000 * errorCount, 60_000);
-
-                await _delayer.Delay(retryDelay, cancellationToken);
-                continue;
-            }
-
-            try
-            {
+                
+                action = "Execute job";
                 var success = await _jobExecutor.Execute(job, cancellationToken);
 
                 if (!success)
+                {
                     // A slight pause to ensure we don't spam-loop in case of errors or existing lock.
                     await Task.Delay(1000, cancellationToken);
+                }
+                
+                exceptionCount = 0;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
             {
                 _logger.LogError(
                     ex,
-                    "Unexpected internal error occurred during execution of job {JobId}.",
-                    job.Id
+                    "Unexpected internal error while running job {JobId}. Current action: {Action}",
+                    job.Id,
+                    action
                 );
+                exceptionCount++;
+
+                var retryDelay = Math.Min(1000 * exceptionCount, 60_000);
+
+                await _delayer.Delay(retryDelay, cancellationToken);
             }
         }
     }
