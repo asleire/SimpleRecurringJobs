@@ -53,6 +53,37 @@ public class IntervalScheduleTests
         }
     }
 
+    [Fact]
+    public async Task TestEnableFeature()
+    {
+        var sc = new ServiceCollection();
+
+        var enabled = false;
+
+        sc.AddSimpleRecurringJobs(b => b.UseInMemoryJobStore().WithJob<IntervalJob>().WithConditionalEnabling(_ => () => ValueTask.FromResult(enabled)));
+
+        var clock = new MockClock();
+        var delayer = new MockDelayer(clock);
+        sc.AddSingleton(_output);
+        sc.AddSingleton<IJobClock>(clock);
+        sc.AddSingleton<IAsyncDelayer>(delayer);
+        sc.AddSingleton<IJobLogger, XunitLogger>();
+        await using var sp = sc.BuildServiceProvider();
+
+        var job = sp.GetRequiredService<IntervalJob>();
+
+        var worker = sp.GetRequiredService<JobsWorker>();
+        await worker.StartAsync(new CancellationToken());
+
+        // It should not run while disabled
+        Assert.NotEqual(1, job.Counter);
+
+        // It should run after enabling and waiting a little
+        enabled = true;
+        clock.UtcNow += TimeSpan.FromMinutes(1);
+        Assert.Equal(1, job.Counter);
+    }
+
     private class IntervalJob : IIntervalJob
     {
         public int Counter { get; set; }

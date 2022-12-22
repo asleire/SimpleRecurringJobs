@@ -15,6 +15,7 @@ internal class JobsWorker : BackgroundService
     private readonly IJobStore _jobStore;
     private readonly IJobLogger _logger;
     private readonly IEnumerable<IJobScheduler> _schedulers;
+    private readonly IEnableFeature _enableFeature;
 #if PRE_NET_6
     private readonly IHostLifetime _hostLifetime;
 #endif
@@ -25,7 +26,8 @@ internal class JobsWorker : BackgroundService
         IJobLogger logger,
         IJobStore jobStore,
         IAsyncDelayer delayer,
-        IJobExecutor jobExecutor
+        IJobExecutor jobExecutor,
+        IEnableFeature enableFeature
 #if PRE_NET_6
         ,
         IHostLifetime hostLifetime
@@ -38,6 +40,7 @@ internal class JobsWorker : BackgroundService
         _delayer = delayer;
         _jobExecutor = jobExecutor;
         _logger = logger.ForSource<JobsWorker>();
+        _enableFeature = enableFeature;
 
 #if PRE_NET_6
         _hostLifetime = hostLifetime;
@@ -55,6 +58,8 @@ internal class JobsWorker : BackgroundService
     {
         try
         {
+            await WaitWhileDisabled(cancellationToken);
+
             _logger.LogInfo("Initializing SimpleRecurringJobs...");
             var jobs = _jobs.ToList();
             var schedulerMap = new Dictionary<string, IJobScheduler>();
@@ -108,12 +113,20 @@ internal class JobsWorker : BackgroundService
         }
     }
 
+    private async Task WaitWhileDisabled(CancellationToken cancellationToken)
+    {
+        while (!await _enableFeature.IsEnabled())
+            await _delayer.Delay(10_000, cancellationToken);
+    }
+
     private async Task RunJob(IJob job, IJobScheduler scheduler, CancellationToken cancellationToken)
     {
         var exceptionCount = 0;
 
         while (!cancellationToken.IsCancellationRequested)
         {
+            await WaitWhileDisabled(cancellationToken);
+
             var action = "";
 
             try

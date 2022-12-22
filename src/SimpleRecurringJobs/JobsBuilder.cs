@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SimpleRecurringJobs;
@@ -41,6 +42,16 @@ public class JobsBuilder
     public JobsBuilder WithJobStore(Func<IServiceProvider, IJobStore> fn)
     {
         _serviceCollection.AddSingleton(fn);
+        return this;
+    }
+
+    public JobsBuilder WithConditionalEnabling(Func<IServiceProvider, Func<ValueTask<bool>>> fn)
+    {
+        _serviceCollection.AddSingleton<IEnableFeature>(sp =>
+        {
+            var enabledFn = fn(sp);
+            return new ConditionalEnableFeature(enabledFn);
+        });
         return this;
     }
 }
