@@ -7,6 +7,19 @@ namespace SimpleRecurringJobs.Mongo;
 
 public static class SimpleRecurringJobsBuilderExtensions
 {
+    /// <summary>
+    /// Configures MongoDB as a JobStore. Retrieves <see cref="IMongoDatabase"/> from <see cref="IServiceProvider"/>
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="optsFn"></param>
+    /// <returns></returns>
+    public static JobsBuilder UseMongoJobStore(
+        this JobsBuilder builder,
+        Action<SimpleRecurringJobsMongoOptions>? optsFn = null)
+    {
+        return UseMongoJobStore(builder, sp => sp.GetRequiredService<IMongoDatabase>(), optsFn);
+    }
+    
     public static JobsBuilder UseMongoJobStore(
         this JobsBuilder builder,
         Func<IServiceProvider, IMongoDatabase> dbResolver,
