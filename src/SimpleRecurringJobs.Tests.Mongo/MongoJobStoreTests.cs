@@ -41,7 +41,7 @@ public class MongoJobStoreTests : StoreTestsBase
         catch (Exception)
         {
             _testOutputHelper.WriteLine(
-                "Create a file named 'redisconnstr.testcfg' and place a redis connection string in it."
+                "Create a file named 'mongoconnstr.testcfg' and place a redis connection string in it."
             );
             throw;
         }
