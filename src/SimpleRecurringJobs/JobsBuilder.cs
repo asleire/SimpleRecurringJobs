@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace SimpleRecurringJobs;
 
@@ -20,10 +21,10 @@ public class JobsBuilder
 
     public IServiceCollection Services => _serviceCollection;
 
-    public JobsBuilder WithJob<TJob>() where TJob : IJob
+    public JobsBuilder WithJob<TJob>() where TJob : class, IJob
     {
-        _serviceCollection.AddSingleton(typeof(TJob));
-        _serviceCollection.AddSingleton(s => (IJob) s.GetRequiredService(typeof(TJob)));
+        _serviceCollection.TryAddSingleton<TJob>();
+        _serviceCollection.AddSingleton<IJob>(sp => sp.GetRequiredService<TJob>());
         return this;
     }
 
