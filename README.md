@@ -87,3 +87,12 @@ The package `SimpleRecurringJobs.Mongo` allows using MongoDB for persisting job 
 var mongoConnStr = ...; // Get MongoDB connection string from somewhere.
 services.AddSimpleRecurringJobs(b => b.UseMongoJobStore(mongoConnStr, o => o.Database = "MyAppDb").WithJob<SimpleJob>());
 ```
+
+## Postgres
+[![NuGet version (SimpleRecurringJobs.Postgres)](https://img.shields.io/nuget/v/SimpleRecurringJobs.Postgres.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs.Postgres/)
+
+The package `SimpleRecurringJobs.Postgres` allows using PostgreSQL for persisting job data. It depends on the Nuget package `Npgsql`.
+```
+var postgresConnStr = ...; // Get postgres connection string from somewhere.
+services.AddSimpleRecurringJobs(b => b.UsePostgresJobStore(postgresConnStr).WithJob<SimpleJob>());
+```

@@ -7,7 +7,7 @@ namespace SimpleRecurringJobs.Postgres;
 public static class SimpleRecurringJobsBuilderExtensions
 {
     /// <summary>
-    /// Configures MongoDB as a JobStore. Retrieves <see cref="NpgDataSource"/> from <see cref="IServiceProvider"/>
+    /// Configures PostgreSQL as a JobStore. Retrieves <see cref="NpgsqlDataSource"/> from <see cref="IServiceProvider"/>
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="optsFn"></param>
