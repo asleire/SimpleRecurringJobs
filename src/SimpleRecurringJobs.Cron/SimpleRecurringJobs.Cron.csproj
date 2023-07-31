@@ -18,6 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="../../README.md" Pack="true" PackagePath="\"/>
+        <None Include="$(SolutionDir)/../README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 </Project>

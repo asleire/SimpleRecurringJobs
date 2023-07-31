@@ -6,6 +6,7 @@
     <LangVersion>latest</LangVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsTrimmable>true</IsTrimmable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,4 +18,7 @@
     <ProjectReference Include="..\SimpleRecurringJobs\SimpleRecurringJobs.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="$(SolutionDir)/../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>
