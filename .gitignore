@@ -33,5 +33,4 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
-redisconnstr.testcfg
-mongoconnstr.testcfg
+*.testcfg
