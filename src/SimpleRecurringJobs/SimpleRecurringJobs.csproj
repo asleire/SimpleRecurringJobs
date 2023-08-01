@@ -1,17 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsTrimmable>true</IsTrimmable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <DefineConstants Condition="'$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'netcoreapp3.1'">$(DefineConstants);PRE_NET_6</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp3.1'">$(DefineConstants);PRE_NET_5</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

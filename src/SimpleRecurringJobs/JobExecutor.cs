@@ -13,6 +13,7 @@ internal class JobsExecutor : IJobExecutor
     private readonly IJobClock _clock;
     private readonly IJobLogger _logger;
     private readonly IJobStore _store;
+    private readonly ActivitySource _activitySource = new ("SimpleRecurringJobs");
 
     public JobsExecutor(IJobStore store, IJobLogger logger, IJobClock clock)
     {
@@ -24,6 +25,9 @@ internal class JobsExecutor : IJobExecutor
     public async Task<bool> Execute(IJob job, CancellationToken cancellationToken)
     {
         var instanceId = Guid.NewGuid().ToString("N");
+        using var activity = _activitySource.StartActivity($"Job: {job.Id}");
+        activity?.SetTag("InstanceId", instanceId);
+        
         var @lock = await _store.TryLock(job, instanceId);
 
         if (@lock == null)
