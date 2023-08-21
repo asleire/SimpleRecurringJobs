@@ -46,13 +46,21 @@ internal class JobsExecutor : IJobExecutor
             _logger.LogVerbose("Executing job {JobId}", job.Id);
             await job.Execute(cancellationToken);
             sw.Stop();
-            _logger.LogVerbose("Executing completed {JobId} in {ElapsedMs}ms", job.Id, sw.ElapsedMilliseconds);
+            _logger.LogVerbose("Execution of {JobId} completed in {ElapsedMs}ms", job.Id, sw.ElapsedMilliseconds);
             info.LastSuccess = _clock.UtcNow;
             await _store.Save(info);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Job {JobId} terminated unexpectedly", job.Id);
+            if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogInfo(ex, "Job {JobId} was cancelled", job.Id);   
+            }
+            else
+            {
+                _logger.LogError(ex, "Job {JobId} terminated unexpectedly", job.Id);
+            }
+
             info.LastFailure = _clock.UtcNow;
             await _store.Save(info);
             return false;
