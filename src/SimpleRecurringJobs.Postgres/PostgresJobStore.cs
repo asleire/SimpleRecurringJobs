@@ -93,7 +93,7 @@ SELECT last_triggered, last_failure, last_success FROM {_tableIdentifier} WHERE 
         {
             Value = job.Id
         });
-        var reader = await cmd.ExecuteReaderAsync();
+        await using var reader = await cmd.ExecuteReaderAsync();
 
         if (!await reader.ReadAsync())
             return JobInfo.CreateDefaultInfo(job.Id);
