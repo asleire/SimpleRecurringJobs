@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
 using SimpleRecurringJobs.InMemory;
 
 namespace SimpleRecurringJobs.Samples.AspNetCore;
@@ -39,6 +40,8 @@ public class Startup
         );
 
         services.AddSimpleRecurringJobs(b => b.UseInMemoryJobStore().WithJob<SimpleJob>());
+
+        services.AddOpenTelemetry().WithMetrics(b => b.AddMeter("SimpleRecurringJobs").AddPrometheusExporter());
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +57,8 @@ public class Startup
         }
 
         app.UseHttpsRedirection();
+        
+        app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
         app.UseRouting();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,11 +15,13 @@ internal class JobsExecutor : IJobExecutor
     private readonly IJobLogger _logger;
     private readonly IJobStore _store;
     private readonly ActivitySource _activitySource = new ("SimpleRecurringJobs");
+    private readonly JobMetrics _jobMetrics;
 
-    public JobsExecutor(IJobStore store, IJobLogger logger, IJobClock clock)
+    public JobsExecutor(IJobStore store, IJobLogger logger, IJobClock clock, JobMetrics jobMetrics)
     {
         _store = store;
         _clock = clock;
+        _jobMetrics = jobMetrics;
         _logger = logger.ForSource<JobsExecutor>();
     }
 
@@ -27,11 +30,34 @@ internal class JobsExecutor : IJobExecutor
         var instanceId = Guid.NewGuid().ToString("N");
         using var activity = _activitySource.StartActivity($"Job: {job.Id}");
         activity?.SetTag("InstanceId", instanceId);
-        
-        var @lock = await _store.TryLock(job, instanceId);
 
-        if (@lock == null)
-            return false;
+        var sw = Stopwatch.StartNew();
+        string lockStatus = "unknown";
+        IJobLock? @lock;
+
+        try
+        {
+            _jobMetrics.JobLockAttemptStarted.Add(1, new KeyValuePair<string, object?>("id", job.Id));
+
+            @lock = await _store.TryLock(job, instanceId);
+
+            if (@lock == null)
+            {
+                lockStatus = "missed";
+                return false;
+            }
+            lockStatus = "acquired";
+        }
+        catch (Exception)
+        {
+            lockStatus = "error";
+            throw;
+        }
+        finally
+        {
+            _jobMetrics.JobLockAttemptCompleted.Add(1, new ("id", job.Id), new ("status", lockStatus));
+            _jobMetrics.JobLockAttemptDurationInMs.Add(sw.ElapsedMilliseconds, new ("id", job.Id), new ("status", lockStatus));
+        }
 
         await using var _ = @lock;
 
@@ -40,32 +66,41 @@ internal class JobsExecutor : IJobExecutor
         info.LastTriggered = _clock.UtcNow;
         await _store.Save(info);
 
+        string status = "unknown";
+
         try
         {
-            var sw = Stopwatch.StartNew();
             _logger.LogVerbose("Executing job {JobId}", job.Id);
+            _jobMetrics.JobStarted.Add(1, new KeyValuePair<string, object?>("id", job.Id));
+            sw.Restart();
             await job.Execute(cancellationToken);
+            status = "completed";
             sw.Stop();
             _logger.LogVerbose("Execution of {JobId} completed in {ElapsedMs}ms", job.Id, sw.ElapsedMilliseconds);
             info.LastSuccess = _clock.UtcNow;
-            await _store.Save(info);
+            return true;
         }
         catch (Exception ex)
         {
             if (ex is OperationCanceledException && cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInfo(ex, "Job {JobId} was cancelled", job.Id);   
+                _logger.LogInfo(ex, "Job {JobId} was cancelled", job.Id);
+                status = "cancelled";
             }
             else
             {
                 _logger.LogError(ex, "Job {JobId} terminated unexpectedly", job.Id);
+                status = "error";
             }
 
             info.LastFailure = _clock.UtcNow;
-            await _store.Save(info);
             return false;
         }
-
-        return true;
+        finally
+        {
+            _jobMetrics.JobCompleted.Add(1, new ("id", job.Id), new ("status", status));
+            _jobMetrics.JobDurationInMs.Add(sw.ElapsedMilliseconds, new ("id", job.Id), new ("status", status));
+            await _store.Save(info);
+        }
     }
 }

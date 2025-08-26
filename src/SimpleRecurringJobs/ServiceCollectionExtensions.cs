@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SimpleRecurringJobs.Interval;
@@ -12,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IJobLogger, MicrosoftLogger>();
         services.AddSingleton<IJobScheduler, IntervalScheduler>();
         services.AddSingleton<IJobExecutor, JobsExecutor>();
+        services.AddSingleton(new JobMetrics(new Meter("SimpleRecurringJobs")));
 
         services.AddSingleton(IJobClock.SystemClock);
         services.AddSingleton(IAsyncDelayer.SystemDelayer);
