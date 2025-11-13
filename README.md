@@ -88,6 +88,8 @@ var mongoConnStr = ...; // Get MongoDB connection string from somewhere.
 services.AddSimpleRecurringJobs(b => b.UseMongoJobStore(mongoConnStr, o => o.Database = "MyAppDb").WithJob<SimpleJob>());
 ```
 
+Note: If using v2.x of the `MongoDB.Driver` nuget package, you must use v1.1.36 of `SimpleRecurringJobs.Mongo`. Later versions will use `MongoDB.Driver` v3 which is incompatible with earlier versions.
+
 ## Postgres
 [![NuGet version (SimpleRecurringJobs.Postgres)](https://img.shields.io/nuget/v/SimpleRecurringJobs.Postgres.svg?style=flat-square)](https://www.nuget.org/packages/SimpleRecurringJobs.Postgres/)
 
